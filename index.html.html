@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>León Autos Seminuevos — Mis Tasaciones</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#F4F6F9;--sur:#FFFFFF;--sur2:#F8F9FB;--bor:#E5E9EF;--bor2:#D0D7E3;
+  --acc:#1A56DB;--grn:#059669;--red:#DC2626;--amb:#D97706;--pur:#7C3AED;--sky:#0EA5E9;
+  --txt:#111827;--mut:#6B7280;--mut2:#9CA3AF;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 12px 32px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh;}
+
+/* LOGIN */
+#cfg{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#EEF2FF,#F4F6F9 50%,#ECFDF5);}
+.cfg-box{width:460px;border:1px solid var(--bor);border-radius:16px;padding:2.5rem;background:var(--sur);box-shadow:var(--shadow-md);}
+.cfg-top{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;}
+.cfg-icon{width:42px;height:42px;background:linear-gradient(135deg,#1A56DB,#0EA5E9);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.cfg-title{font-size:11px;font-weight:700;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;}
+.cfg-subtitle{font-size:13px;font-weight:600;color:var(--txt);margin-top:2px;}
+.cfg-box h1{font-size:24px;font-weight:700;margin-bottom:.35rem;}
+.cfg-box p{font-size:13px;color:var(--mut);margin-bottom:1.75rem;line-height:1.6;}
+.fld{margin-bottom:.9rem;}
+.fld label{display:block;font-size:11px;font-weight:600;color:var(--mut);letter-spacing:.04em;margin-bottom:.35rem;text-transform:uppercase;}
+.fld input,.fld select{width:100%;background:var(--sur2);border:1.5px solid var(--bor);border-radius:8px;padding:.55rem .8rem;color:var(--txt);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border .2s,box-shadow .2s;}
+.fld input:focus,.fld select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(26,86,219,.1);}
+.fld select option{background:var(--sur);}
+.btn-p{width:100%;background:var(--acc);color:#fff;border:none;border-radius:8px;padding:.8rem;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:.5rem;transition:all .2s;box-shadow:0 2px 8px rgba(26,86,219,.3);}
+.btn-p:hover{background:#1648C0;transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,86,219,.4);}
+#cfg-err{font-size:12px;color:var(--red);margin-top:.6rem;display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:.5rem .75rem;}
+
+/* TOPBAR */
+.topbar{background:var(--sur);border-bottom:1px solid var(--bor);padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;box-shadow:0 1px 4px rgba(0,0,0,.06);flex-wrap:wrap;gap:.5rem;}
+.tb-left{display:flex;align-items:center;gap:.75rem;}
+.tb-icon{width:34px;height:34px;background:linear-gradient(135deg,#1A56DB,#0EA5E9);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.tb-brand{font-size:14px;font-weight:700;}
+.tb-sub{font-size:11px;color:var(--mut);margin-top:1px;}
+.tb-right{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;}
+.live-badge{display:flex;align-items:center;gap:.4rem;background:#DCFCE7;border:1px solid #BBF7D0;border-radius:20px;padding:.2rem .65rem;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.live-txt{font-size:11px;color:var(--grn);font-weight:600;}
+.btn-sm{font-size:11px;font-weight:500;color:var(--mut);background:var(--sur2);border:1.5px solid var(--bor);border-radius:6px;padding:.3rem .75rem;cursor:pointer;transition:all .2s;}
+.btn-sm:hover{border-color:var(--acc);color:var(--acc);}
+.btn-out{font-size:11px;color:var(--mut2);background:none;border:none;cursor:pointer;font-weight:500;}
+
+/* FILTER BAR */
+.fbar{background:var(--sur);border-bottom:1px solid var(--bor);padding:.6rem 1.5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.flbl{font-size:10px;font-weight:700;color:var(--mut2);letter-spacing:.06em;text-transform:uppercase;}
+.tab{font-size:11px;font-weight:500;padding:.25rem .7rem;border-radius:6px;border:1.5px solid var(--bor);background:none;color:var(--mut);cursor:pointer;transition:all .15s;}
+.tab.act{border-color:var(--acc);color:var(--acc);background:#EEF2FF;font-weight:600;}
+.tab:hover{border-color:var(--acc);color:var(--acc);}
+.fsep{width:1px;height:16px;background:var(--bor2);}
+.fsel{background:var(--sur2);border:1.5px solid var(--bor);border-radius:6px;color:var(--txt);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;padding:.25rem .55rem;outline:none;cursor:pointer;}
+#sbar{margin-left:auto;font-size:11px;color:var(--mut2);}
+
+/* MAIN */
+.main{padding:1.5rem;max-width:1400px;margin:0 auto;}
+
+/* METRIC CARDS */
+.mcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+.mc{background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:1rem 1.1rem;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.mc::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:12px 0 0 12px;}
+.mc.c-blue::before{background:var(--acc);}
+.mc.c-grn::before{background:var(--grn);}
+.mc.c-amb::before{background:var(--amb);}
+.mc.c-red::before{background:var(--red);}
+.mc.c-sky::before{background:var(--sky);}
+.mc.c-pur::before{background:var(--pur);}
+.mc-l{font-size:9px;font-weight:700;color:var(--mut2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;}
+.mc-v{font-size:28px;font-weight:700;line-height:1;color:var(--txt);}
+.mc-s{font-size:11px;color:var(--mut);margin-top:.25rem;}
+
+/* SLA TIMER COLORS */
+.sla-ok{color:var(--grn);font-weight:600;}
+.sla-warn{color:var(--amb);font-weight:600;}
+.sla-late{color:var(--red);font-weight:700;}
+.sla-badge-ok{background:#DCFCE7;color:#15803D;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;}
+.sla-badge-warn{background:#FEF3C7;color:#92400E;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;}
+.sla-badge-late{background:#FEE2E2;color:#991B1B;border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;}
+
+/* KANBAN */
+.kanban{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+.kol{background:var(--sur2);border:1px solid var(--bor);border-radius:12px;overflow:hidden;}
+.kol-head{padding:.65rem .9rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bor);}
+.kol-name{font-size:12px;font-weight:700;color:var(--txt);}
+.kol-count{font-size:11px;font-weight:600;background:var(--sur);border:1px solid var(--bor);border-radius:20px;padding:1px 8px;color:var(--mut);}
+.kol-body{padding:.5rem;display:flex;flex-direction:column;gap:.4rem;max-height:420px;overflow-y:auto;}
+.kol-body::-webkit-scrollbar{width:4px;}
+.kol-body::-webkit-scrollbar-track{background:transparent;}
+.kol-body::-webkit-scrollbar-thumb{background:var(--bor2);border-radius:4px;}
+
+/* CARDS */
+.opp-card{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:.7rem .8rem;cursor:pointer;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.opp-card:hover{box-shadow:var(--shadow);border-color:var(--acc);transform:translateY(-1px);}
+.opp-name{font-size:12px;font-weight:600;color:var(--txt);margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.opp-modelo{font-size:11px;color:var(--acc);font-weight:500;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.opp-price{font-size:13px;font-weight:700;color:var(--grn);}
+.opp-meta{display:flex;align-items:center;justify-content:space-between;margin-top:.4rem;}
+.opp-asesor{font-size:10px;color:var(--mut);}
+.opp-timer{font-size:10px;font-family:'DM Mono',monospace;font-weight:600;}
+
+/* TABLE */
+.tbl-wrap{background:var(--sur);border:1px solid var(--bor);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl thead{background:var(--sur2);}
+.tbl th{font-size:10px;font-weight:700;color:var(--mut2);letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:.6rem .75rem;border-bottom:2px solid var(--bor);}
+.tbl td{padding:.55rem .75rem;border-bottom:1px solid var(--bor);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#F9FAFB;}
+.stage-pill{display:inline-block;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;}
+
+/* SLA TABLE */
+.sec-title{font-size:10px;font-weight:700;color:var(--mut2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.65rem;display:flex;align-items:center;gap:.5rem;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bor);}
+
+/* AVATAR */
+.av{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+
+/* MODAL */
+#modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem;}
+.modal{background:var(--sur);border-radius:16px;width:100%;max-width:480px;box-shadow:var(--shadow-md);overflow:hidden;}
+.modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--bor);display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-title{font-size:16px;font-weight:700;}
+.modal-close{width:28px;height:28px;border-radius:8px;background:var(--sur2);border:1px solid var(--bor);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-body{padding:1.25rem 1.5rem;}
+.modal-row{display:flex;align-items:flex-start;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--bor);}
+.modal-row:last-child{border-bottom:none;}
+.modal-key{font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;width:130px;}
+.modal-val{font-size:12px;font-weight:500;color:var(--txt);text-align:right;}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:rgba(255,255,255,.92);display:none;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:1rem;}
+.ld-dots{display:flex;gap:8px;}
+.ld-dot{width:10px;height:10px;border-radius:50%;background:var(--acc);animation:ldot .8s infinite;}
+.ld-dot:nth-child(2){animation-delay:.15s}.ld-dot:nth-child(3){animation-delay:.3s}
+@keyframes ldot{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
+.ld-txt{font-size:13px;color:var(--mut);font-weight:500;}
+.empty{font-size:12px;color:var(--mut2);padding:2rem;text-align:center;}
+#dash{display:none;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="cfg">
+  <div class="cfg-box">
+    <div class="cfg-top">
+      <div class="cfg-icon">🚗</div>
+      <div>
+        <div class="cfg-title">León Autos Seminuevos</div>
+        <div class="cfg-subtitle">Portal de Tasaciones</div>
+      </div>
+    </div>
+    <h1>Mis Tasaciones</h1>
+    <p>Consulta en tiempo real el estado de cada cliente que enviaste a tasar, su valorización y tiempo de respuesta.</p>
+    <div class="fld">
+      <label>API Key Seminuevos</label>
+      <input type="password" id="inp-key" placeholder="pit-xxxxxxxx-..."/>
+    </div>
+    <div class="fld">
+      <label>Ver tasaciones de</label>
+      <select id="inp-user">
+        <option value="todos">Todos los asesores</option>
+      </select>
+    </div>
+    <button class="btn-p" onclick="connect()">Ver mis tasaciones →</button>
+    <div id="cfg-err"></div>
+  </div>
+</div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-dots"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div>
+  <div class="ld-txt" id="ld-msg">Cargando tasaciones...</div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-bg" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="m-name"></div>
+        <div style="font-size:12px;color:var(--mut);margin-top:3px" id="m-stage-lbl"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-bg').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash">
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-icon">🚗</div>
+      <div>
+        <div class="tb-brand">Tasaciones · León Autos Seminuevos</div>
+        <div class="tb-sub" id="tb-sub">Pipeline Tasación</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="live-badge"><div class="live-dot"></div><span class="live-txt">En vivo</span></div>
+      <button class="btn-sm" onclick="reload()">↻ Actualizar</button>
+      <span id="last-upd" style="font-size:11px;color:var(--mut2)"></span>
+      <button class="btn-out" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="fbar">
+    <span class="flbl">VISTA:</span>
+    <button class="tab act" onclick="setView('kanban',this)">Kanban</button>
+    <button class="tab" onclick="setView('tabla',this)">Tabla</button>
+    <div class="fsep"></div>
+    <span class="flbl">ASESOR:</span>
+    <select class="fsel" id="sel-asesor" onchange="renderAll()"></select>
+    <div class="fsep"></div>
+    <span class="flbl">MES:</span>
+    <select class="fsel" id="sel-mes" onchange="renderAll()">
+      <option value="todos">Todos los meses</option>
+    </select>
+    <div class="fsep"></div>
+    <span class="flbl">ETAPA:</span>
+    <button class="tab act" onclick="setEtapa('todas',this)">Todas</button>
+    <button class="tab" onclick="setEtapa('activas',this)">Activas</button>
+    <button class="tab" onclick="setEtapa('compra',this)">Compra</button>
+    <button class="tab" onclick="setEtapa('perdido',this)">Perdido</button>
+    <span id="sbar"></span>
+  </div>
+
+  <div class="main">
+    <!-- METRICS -->
+    <div class="mcs" id="mcs"></div>
+
+    <!-- KANBAN VIEW -->
+    <div id="view-kanban">
+      <div class="sec-title">ESTADO DEL PIPELINE · TIEMPO REAL</div>
+      <div class="kanban" id="kanban-board"></div>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <div id="view-tabla" style="display:none">
+      <div class="sec-title">DETALLE DE TODAS LAS TASACIONES</div>
+      <div class="tbl-wrap">
+        <table class="tbl" id="tbl-main">
+          <thead><tr>
+            <th>CLIENTE</th><th>MODELO / PLACA</th><th>VALORIZACIÓN</th>
+            <th>ETAPA</th><th>ASESOR</th><th>CREADO</th><th>TIEMPO EN PROCESO</th><th>SLA</th>
+          </tr></thead>
+          <tbody id="tbl-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLA / TIEMPOS -->
+    <div style="margin-top:1.5rem">
+      <div class="sec-title">TENDENCIA MENSUAL</div>
+      <div style="background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:1.1rem;box-shadow:var(--shadow);margin-bottom:1rem;">
+        <div style="display:flex;gap:16px;margin-bottom:.5rem;font-size:11px;color:var(--mut)">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:3px;background:#1A56DB"></span>Total derivadas</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:3px;background:#059669"></span>Compras</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:3px;background:#DC2626"></span>Perdidas</span>
+        </div>
+        <div style="position:relative;height:180px"><canvas id="ch-mensual"></canvas></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:1.1rem;box-shadow:var(--shadow)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:.75rem;color:var(--txt)">Tiempo promedio por etapa (horas)</div>
+          <div style="position:relative;height:200px"><canvas id="ch-etapas"></canvas></div>
+        </div>
+        <div style="background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:1.1rem;box-shadow:var(--shadow)">
+          <div style="font-size:12px;font-weight:700;margin-bottom:.75rem;color:var(--txt)">Tiempo promedio por asesor (horas)</div>
+          <div style="position:relative;height:200px"><canvas id="ch-asesores"></canvas></div>
+        </div>
+      </div>
+
+      <!-- SLA TABLE -->
+      <div style="margin-top:1rem;background:var(--sur);border:1px solid var(--bor);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)">
+        <div style="padding:.75rem 1rem;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:700">Ranking de tasaciones por tiempo de respuesta</div>
+          <div style="font-size:11px;color:var(--mut2)">🟢 ≤24h &nbsp; 🟡 24–72h &nbsp; 🔴 +72h</div>
+        </div>
+        <table class="tbl" id="tbl-sla">
+          <thead><tr>
+            <th>#</th><th>CLIENTE</th><th>MODELO</th><th>ASESOR</th>
+            <th>ETAPA ACTUAL</th><th>CREADO</th><th>TIEMPO TOTAL</th><th>SLA</th>
+          </tr></thead>
+          <tbody id="sla-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BASE = 'https://services.leadconnectorhq.com';
+const LOC_SN = '4AsSvyoB6Bd221w3NoQP';
+const PIPE_TAS = 'qbW92GqExfBdHIHdno9j';
+const S_COMPRA = '31684638-20ba-493a-9d99-a435e22e4ed6';
+const S_PERDIDO = '8b39839b-1857-40a5-9f79-80726e76846d';
+
+const STAGES = {
+  'd7da26cf-ec59-44d8-96f4-044596112eba': {name:'Enviado a Tasación',  color:'#DBEAFE', txt:'#1D4ED8'},
+  '181f74ea-bb16-46e9-a4e8-345bdca70a2f': {name:'Pre Valorización',    color:'#EDE9FE', txt:'#6D28D9'},
+  'aac84335-3b46-455d-8f6c-ba3e40af80cf': {name:'Contactado',          color:'#FEF3C7', txt:'#92400E'},
+  'e68c2e82-e36e-4823-9627-1f3d065982e0': {name:'Cliente acepta Pre Oferta', color:'#D1FAE5', txt:'#065F46'},
+  '945e6f2f-50f5-4a69-8983-02a40f5ba7be': {name:'Tasacion V & M',      color:'#FEE2E2', txt:'#991B1B'},
+  '17aa50c5-ea14-4cc4-9c86-c8dca9a025e3': {name:'En aprobacion',       color:'#FEF9C3', txt:'#854D0E'},
+  'a87d2aef-d63b-4d63-9b11-d2487670b09b': {name:'Aprobado',            color:'#D1FAE5', txt:'#065F46'},
+  '31684638-20ba-493a-9d99-a435e22e4ed6': {name:'Compra',              color:'#DCFCE7', txt:'#15803D'},
+  '8b39839b-1857-40a5-9f79-80726e76846d': {name:'Perdido',             color:'#F3F4F6', txt:'#6B7280'},
+};
+const STAGE_ORDER = Object.keys(STAGES);
+const AVC = ['#1A56DB','#059669','#D97706','#7C3AED','#DC2626','#0EA5E9','#B45309','#374151'];
+
+let API_KEY = '', ALL_OPPS = [], USERS = {}, VIEW = 'kanban', ETAPA_FILTER = 'todas';
+let CH1 = null, CH2 = null, CH3 = null;
+let AUTO_REFRESH = null;
+
+const H = () => ({'Authorization':`Bearer ${API_KEY}`,'Version':'2021-07-28','Accept':'application/json'});
+async function api(p){const r=await fetch(BASE+p,{headers:H()});const b=await r.json();if(!r.ok)throw new Error(JSON.stringify(b).substring(0,200));return b;}
+
+function showErr(m){const e=document.getElementById('cfg-err');e.textContent=m;e.style.display='block';}
+function loader(v,m='Cargando tasaciones...'){document.getElementById('loader').style.display=v?'flex':'none';document.getElementById('ld-msg').textContent=m;}
+function logout(){
+  API_KEY=''; ALL_OPPS=[];
+  clearInterval(AUTO_REFRESH);
+  document.getElementById('dash').style.display='none';
+  document.getElementById('cfg').style.display='flex';
+}
+function setView(v,b){
+  VIEW=v;
+  document.querySelectorAll('.tab[onclick*="setView"]').forEach(x=>x.classList.remove('act'));
+  b.classList.add('act');
+  document.getElementById('view-kanban').style.display=v==='kanban'?'block':'none';
+  document.getElementById('view-tabla').style.display=v==='tabla'?'block':'none';
+  renderAll();
+}
+function setEtapa(e,b){
+  ETAPA_FILTER=e;
+  document.querySelectorAll('.tab[onclick*="setEtapa"]').forEach(x=>x.classList.remove('act'));
+  b.classList.add('act');
+  renderAll();
+}
+
+async function connect(){
+  API_KEY = document.getElementById('inp-key').value.trim();
+  if(!API_KEY){showErr('Ingresa tu API Key de Seminuevos.');return;}
+  document.getElementById('cfg-err').style.display='none';
+  loader(true,'Conectando con GHL...');
+  try{
+    // Load users from Seminuevos location specifically
+    const ud = await api(`/users/?locationId=${LOC_SN}`);
+    USERS = {};
+    (ud.users||[]).forEach(u=>{
+      USERS[u.id]=(u.name||(u.firstName||'')+' '+(u.lastName||'')).trim();
+    });
+
+    // Load opps first so we can see which users actually appear
+    await loadOpps();
+
+    // Build user list from actual opps (not all location users)
+    // This ensures we only show users who have tasaciones
+    const usersInOpps = {};
+    ALL_OPPS.forEach(o=>{
+      if(o.assignedTo && USERS[o.assignedTo]){
+        usersInOpps[o.assignedTo] = USERS[o.assignedTo];
+      }
+    });
+
+    // Populate login user selector
+    const selLogin = document.getElementById('inp-user');
+    selLogin.innerHTML = '<option value="todos">Todos los asesores</option>' +
+      Object.entries(usersInOpps)
+        .sort((a,b)=>a[1].localeCompare(b[1]))
+        .map(([id,n])=>`<option value="${id}">${n}</option>`).join('');
+
+    // Show dashboard
+    document.getElementById('cfg').style.display='none';
+    document.getElementById('dash').style.display='block';
+
+    // Populate dashboard selectors
+    populateSelectors();
+    renderAll();
+
+    // Auto-refresh every 2 minutes
+    AUTO_REFRESH = setInterval(()=>loadOpps().then(()=>{populateSelectors();renderAll();}), 120000);
+  }catch(e){
+    loader(false);
+    showErr('Error de conexión: '+e.message);
+  }
+}
+
+async function loadOpps(){
+  loader(true,'Actualizando tasaciones...');
+  ALL_OPPS=[];
+  let page=1,more=true;
+  while(more&&ALL_OPPS.length<2000){
+    loader(true,`Cargando... ${ALL_OPPS.length} tasaciones`);
+    const d=await api(`/opportunities/search?location_id=${LOC_SN}&pipeline_id=${PIPE_TAS}&limit=100&page=${page}`);
+    const b=d.opportunities||[];ALL_OPPS.push(...b);more=b.length===100;page++;
+  }
+  document.getElementById('last-upd').textContent='Actualizado: '+new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+  loader(false);
+}
+
+async function reload(){await loadOpps();renderAll();}
+
+function populateSelectors(){
+  const MNMS={1:'Ene',2:'Feb',3:'Mar',4:'Abr',5:'May',6:'Jun',7:'Jul',8:'Ago',9:'Sep',10:'Oct',11:'Nov',12:'Dic'};
+
+  // Build users from actual opps data
+  const usersInOpps = {};
+  ALL_OPPS.forEach(o=>{
+    if(o.assignedTo){
+      usersInOpps[o.assignedTo] = USERS[o.assignedTo] || o.assignedTo;
+    }
+  });
+
+  // Asesor selector — preserve current selection
+  const selA = document.getElementById('sel-asesor');
+  const prevA = selA?.value || document.getElementById('inp-user')?.value || 'todos';
+  if(selA){
+    selA.innerHTML = '<option value="todos">Todos los asesores</option>' +
+      Object.entries(usersInOpps)
+        .sort((a,b)=>a[1].localeCompare(b[1]))
+        .map(([id,n])=>`<option value="${id}" ${id===prevA?'selected':''}>${n}</option>`).join('');
+  }
+
+  // Month selector from opps
+  const months = [...new Set(ALL_OPPS.map(o=>{
+    const d=new Date(o.createdAt);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }))].sort().reverse();
+
+  const selM = document.getElementById('sel-mes');
+  const prevM = selM?.value || 'todos';
+  if(selM){
+    const today = new Date();
+    const curKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    selM.innerHTML = '<option value="todos">Todos los meses</option>' +
+      months.map(m=>{
+        const [y,mo]=m.split('-');
+        const lbl=`${MNMS[+mo]} ${y}`;
+        return `<option value="${m}" ${m===(prevM==='todos'?curKey:prevM)?'selected':''}>${lbl}</option>`;
+      }).join('');
+  }
+}
+
+function getOpps(){
+  const uid = document.getElementById('sel-asesor')?.value || 'todos';
+  const mes = document.getElementById('sel-mes')?.value || 'todos';
+
+  return ALL_OPPS.filter(o=>{
+    // Filter by asesor — match by assignedTo ID directly
+    if(uid !== 'todos' && o.assignedTo !== uid) return false;
+
+    // Filter by month
+    if(mes !== 'todos'){
+      const d = new Date(o.createdAt);
+      const oKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if(oKey !== mes) return false;
+    }
+
+    // Filter by etapa
+    if(ETAPA_FILTER === 'activas') return o.pipelineStageId !== S_COMPRA && o.pipelineStageId !== S_PERDIDO;
+    if(ETAPA_FILTER === 'compra')  return o.pipelineStageId === S_COMPRA;
+    if(ETAPA_FILTER === 'perdido') return o.pipelineStageId === S_PERDIDO;
+    return true;
+  });
+}
+
+// ── FIELD EXTRACTION ──────────────────────────────────────────────────────
+// We'll try multiple field IDs as we don't know exact field mapping yet
+// The user can adjust these after first run
+function getField(opp, ...fieldIds){
+  const cfs = opp.customFields||[];
+  for(const id of fieldIds){
+    const f=cfs.find(x=>x.id===id);
+    if(f){
+      return f.fieldValueString||f.fieldValueNumber||
+        (f.fieldValueFiles&&f.fieldValueFiles.length?'📎 Archivo adjunto':null)||
+        (Array.isArray(f.fieldValue)?f.fieldValue.join(', '):null)||'';
+    }
+  }
+  return '';
+}
+
+function getModelo(opp){
+  // Try common field IDs for modelo/marca/vehiculo
+  const m=getField(opp,'NVwfaHEpo5g70wBT3HHm','nxzMqGd0PfODW7PWI6Ug','modelo','vehicle','vehiculo');
+  return m||opp.name||'—';
+}
+
+function getValorizacion(opp){
+  if(opp.monetaryValue&&opp.monetaryValue>0)
+    return '$ '+Number(opp.monetaryValue).toLocaleString('es-PE');
+  // Try custom fields for price
+  const v=getField(opp,'precio','valoracion','valor','price','tasacion_valor','oferta');
+  return v?'$ '+v:'Sin valorizar';
+}
+
+function getPlaca(opp){
+  return getField(opp,'NVwfaHEpo5g70wBT3HHm','placa','plate')||'—';
+}
+
+function getFuente(opp){
+  return opp.source||getField(opp,'fuente','source_opp','origen')||'—';
+}
+
+// ── TIME HELPERS ──────────────────────────────────────────────────────────
+function elapsed(ts){
+  const ms=Date.now()-new Date(ts).getTime();
+  const h=Math.floor(ms/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+  if(h>=24) return `${Math.floor(h/24)}d ${h%24}h`;
+  return `${h}h ${m}m`;
+}
+function elapsedHours(ts){return (Date.now()-new Date(ts).getTime())/3600000;}
+function slaColor(h){return h<=24?'ok':h<=72?'warn':'late';}
+function slaBadge(h){
+  const c=slaColor(h);
+  return `<span class="sla-badge-${c}">${c==='ok'?'🟢 Al día':c==='warn'?'🟡 En proceso':'🔴 Tardío'}</span>`;
+}
+function formatDate(ts){return new Date(ts).toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function renderAll(){
+  const opps=getOpps();
+  const asesor=document.getElementById('sel-asesor')?.value||'todos';
+  const asesorName=asesor==='todos'?'Todos':USERS[asesor]||asesor;
+  document.getElementById('tb-sub').textContent=`${asesorName} · ${opps.length} tasaciones`;
+  const mes=document.getElementById('sel-mes')?.value||'todos';
+  const mesLbl=mes==='todos'?'Todos los meses':document.getElementById('sel-mes')?.options[document.getElementById('sel-mes')?.selectedIndex]?.text||mes;
+  document.getElementById('sbar').textContent=`${mesLbl} · ${opps.length} tasaciones`;
+  document.getElementById('tb-sub').textContent=`${asesorName} · ${mesLbl} · ${opps.length} tasaciones`;
+  renderMetrics(opps);
+  if(VIEW==='kanban') renderKanban(opps);
+  else renderTabla(opps);
+  renderSLA(opps);
+  renderCharts(opps);
+}
+
+function renderMetrics(opps){
+  const activas=opps.filter(o=>o.pipelineStageId!==S_COMPRA&&o.pipelineStageId!==S_PERDIDO);
+  const compras=opps.filter(o=>o.pipelineStageId===S_COMPRA);
+  const perdidas=opps.filter(o=>o.pipelineStageId===S_PERDIDO);
+  const sinValor=opps.filter(o=>!o.monetaryValue||o.monetaryValue===0).length;
+  const conValor=opps.length-sinValor;
+  const avgH=activas.length?
+    (activas.reduce((a,o)=>a+elapsedHours(o.createdAt),0)/activas.length):0;
+  const valorTotal=compras.reduce((a,o)=>a+(o.monetaryValue||0),0);
+
+  document.getElementById('mcs').innerHTML=`
+    <div class="mc c-blue">
+      <div class="mc-l">Total Tasaciones</div>
+      <div class="mc-v">${opps.length}</div>
+      <div class="mc-s">en el pipeline</div>
+    </div>
+    <div class="mc c-sky">
+      <div class="mc-l">Activas</div>
+      <div class="mc-v" style="color:var(--sky)">${activas.length}</div>
+      <div class="mc-s">en proceso ahora</div>
+    </div>
+    <div class="mc c-grn">
+      <div class="mc-l">Compras</div>
+      <div class="mc-v" style="color:var(--grn)">${compras.length}</div>
+      <div class="mc-s">${opps.length?Math.round(compras.length/opps.length*100):0}% de conversión</div>
+    </div>
+    <div class="mc c-red">
+      <div class="mc-l">Perdidas</div>
+      <div class="mc-v" style="color:var(--red)">${perdidas.length}</div>
+      <div class="mc-s">${opps.length?Math.round(perdidas.length/opps.length*100):0}% del total</div>
+    </div>
+    <div class="mc c-amb">
+      <div class="mc-l">Tiempo Promedio</div>
+      <div class="mc-v" style="font-size:20px;padding-top:4px;color:var(--amb)">${avgH<24?Math.round(avgH)+'h':Math.floor(avgH/24)+'d'}</div>
+      <div class="mc-s">respuesta en activas</div>
+    </div>
+    <div class="mc c-pur">
+      <div class="mc-l">Valor en Compras</div>
+      <div class="mc-v" style="font-size:18px;padding-top:4px;color:var(--pur)">${valorTotal?'$'+Math.round(valorTotal/1000)+'k':'—'}</div>
+      <div class="mc-s">monetaryValue total</div>
+    </div>
+  `;
+}
+
+function renderKanban(opps){
+  const board=document.getElementById('kanban-board');
+  // Only show non-empty stages or all active stages
+  const visibleStages=STAGE_ORDER.filter(sid=>{
+    const count=opps.filter(o=>o.pipelineStageId===sid).length;
+    return count>0 || sid===S_COMPRA || sid==='d7da26cf-ec59-44d8-96f4-044596112eba';
+  });
+
+  board.innerHTML=visibleStages.map(sid=>{
+    const stage=STAGES[sid];
+    const stageOpps=opps.filter(o=>o.pipelineStageId===sid);
+    const cards=stageOpps.map(o=>{
+      const h=elapsedHours(o.createdAt);
+      const tc=slaColor(h);
+      const tcCol=tc==='ok'?'var(--grn)':tc==='warn'?'var(--amb)':'var(--red)';
+      const modelo=getModelo(o);
+      const val=getValorizacion(o);
+      const asesor=(USERS[o.assignedTo]||'—').split(' ')[0];
+      return `<div class="opp-card" onclick="openModal('${o.id}')">
+        <div class="opp-name" title="${o.name}">${o.name||'Sin nombre'}</div>
+        <div class="opp-modelo" title="${modelo}">${modelo}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="opp-price">${val}</div>
+          <div class="opp-timer" style="color:${tcCol}" title="${elapsed(o.createdAt)} en proceso">⏱ ${elapsed(o.createdAt)}</div>
+        </div>
+        <div class="opp-meta">
+          <span class="opp-asesor">👤 ${asesor}</span>
+          <span style="font-size:10px;color:var(--mut2)">${new Date(o.createdAt).toLocaleDateString('es-PE',{day:'2-digit',month:'short'})}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="kol">
+      <div class="kol-head" style="background:${stage.color}20;border-color:${stage.color}60;">
+        <span class="kol-name" style="color:${stage.txt}">${stage.name}</span>
+        <span class="kol-count">${stageOpps.length}</span>
+      </div>
+      <div class="kol-body">${cards||'<div class="empty" style="padding:.75rem;font-size:11px">Sin tasaciones</div>'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTabla(opps){
+  const tbody=document.getElementById('tbl-body');
+  if(!opps.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--mut2)">Sin tasaciones</td></tr>';return;}
+  const sorted=[...opps].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  tbody.innerHTML=sorted.map(o=>{
+    const stage=STAGES[o.pipelineStageId]||{name:'—',color:'#F3F4F6',txt:'#6B7280'};
+    const h=elapsedHours(o.createdAt);
+    const tc=slaColor(h);
+    const tcCol=tc==='ok'?'var(--grn)':tc==='warn'?'var(--amb)':'var(--red)';
+    return `<tr onclick="openModal('${o.id}')" style="cursor:pointer">
+      <td style="font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.name||'—'}</td>
+      <td style="font-size:11px">${getModelo(o)}<br><span style="color:var(--mut2);font-size:10px">${getPlaca(o)}</span></td>
+      <td style="font-weight:600;color:var(--grn)">${getValorizacion(o)}</td>
+      <td><span class="stage-pill" style="background:${stage.color};color:${stage.txt}">${stage.name}</span></td>
+      <td style="font-size:11px">${(USERS[o.assignedTo]||'—').split(' ').slice(0,2).join(' ')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">${formatDate(o.createdAt)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:${tcCol}">${elapsed(o.createdAt)}</td>
+      <td>${slaBadge(h)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderSLA(opps){
+  const tbody=document.getElementById('sla-body');
+  if(!opps.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--mut2)">Sin tasaciones</td></tr>';return;}
+  const sorted=[...opps].sort((a,b)=>elapsedHours(b.createdAt)-elapsedHours(a.createdAt));
+  tbody.innerHTML=sorted.slice(0,30).map((o,i)=>{
+    const stage=STAGES[o.pipelineStageId]||{name:'—',color:'#F3F4F6',txt:'#6B7280'};
+    const h=elapsedHours(o.createdAt);
+    const tc=slaColor(h);
+    const tcCol=tc==='ok'?'var(--grn)':tc==='warn'?'var(--amb)':'var(--red)';
+    return `<tr onclick="openModal('${o.id}')" style="cursor:pointer">
+      <td style="font-family:'DM Mono',monospace;color:var(--mut2);font-size:11px">${i+1}</td>
+      <td style="font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.name||'—'}</td>
+      <td style="font-size:11px;color:var(--mut)">${getModelo(o)}</td>
+      <td style="font-size:11px">${(USERS[o.assignedTo]||'—').split(' ').slice(0,2).join(' ')}</td>
+      <td><span class="stage-pill" style="background:${stage.color};color:${stage.txt}">${stage.name}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mut)">${formatDate(o.createdAt)}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${tcCol}">${elapsed(o.createdAt)}</td>
+      <td>${slaBadge(h)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCharts(opps){
+  const TC='#9CA3AF',GC='rgba(0,0,0,0.05)';
+  const MNMS={1:'Ene',2:'Feb',3:'Mar',4:'Abr',5:'May',6:'Jun',7:'Jul',8:'Ago',9:'Sep',10:'Oct',11:'Nov',12:'Dic'};
+  const activas=opps.filter(o=>o.pipelineStageId!==S_COMPRA&&o.pipelineStageId!==S_PERDIDO);
+
+  // Chart 3: Monthly trend — use ALL_OPPS filtered only by asesor (not by month)
+  const uid = document.getElementById('sel-asesor')?.value || 'todos';
+  const oppsForTrend = ALL_OPPS.filter(o=>uid==='todos'||o.assignedTo===uid);
+  const allMonths=[...new Set(oppsForTrend.map(o=>{const d=new Date(o.createdAt);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}))].sort();
+  const mLabels=allMonths.map(m=>{const[y,mo]=m.split('-');return `${MNMS[+mo]} ${y.slice(2)}`;});
+  const mTotal=allMonths.map(m=>oppsForTrend.filter(o=>{const d=new Date(o.createdAt);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`===m;}).length);
+  const mCompra=allMonths.map(m=>oppsForTrend.filter(o=>{const d=new Date(o.createdAt);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`===m&&o.pipelineStageId===S_COMPRA;}).length);
+  const mPerdido=allMonths.map(m=>oppsForTrend.filter(o=>{const d=new Date(o.createdAt);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`===m&&o.pipelineStageId===S_PERDIDO;}).length);
+
+  if(CH3){CH3.destroy();CH3=null;}
+  CH3=new Chart(document.getElementById('ch-mensual'),{
+    type:'bar',
+    data:{labels:mLabels,datasets:[
+      {label:'Total',data:mTotal,backgroundColor:'#3B82F6',borderRadius:3},
+      {label:'Compras',data:mCompra,backgroundColor:'#059669',borderRadius:3},
+      {label:'Perdidas',data:mPerdido,backgroundColor:'#EF4444',borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:TC,font:{size:10}},grid:{display:false}},y:{ticks:{color:TC,font:{size:10}},grid:{color:GC}}}}
+  });
+
+  // Chart 1: avg time per stage (hours)
+  const stageHours={};
+  const stageCounts={};
+  activas.forEach(o=>{
+    const sn=STAGES[o.pipelineStageId]?.name||'—';
+    stageHours[sn]=(stageHours[sn]||0)+elapsedHours(o.createdAt);
+    stageCounts[sn]=(stageCounts[sn]||0)+1;
+  });
+  const stageNames=Object.keys(stageHours);
+  const stageAvg=stageNames.map(n=>Math.round(stageHours[n]/stageCounts[n]*10)/10);
+
+  if(CH1){CH1.destroy();CH1=null;}
+  CH1=new Chart(document.getElementById('ch-etapas'),{
+    type:'bar',
+    data:{labels:stageNames,datasets:[{
+      data:stageAvg,
+      backgroundColor:stageNames.map((_,i)=>['#3B82F6','#8B5CF6','#F59E0B','#10B981','#EF4444','#0EA5E9','#D97706','#059669'][i%8]),
+      borderRadius:4,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}h promedio`}}},
+      scales:{x:{ticks:{color:TC,font:{size:10},callback:v=>v+'h'},grid:{color:GC}},y:{ticks:{color:TC,font:{size:10}},grid:{display:false}}}}
+  });
+
+  // Chart 2: avg time per asesor
+  const aHours={};const aCounts={};
+  activas.forEach(o=>{
+    const n=(USERS[o.assignedTo]||'Sin asignar').split(' ')[0];
+    aHours[n]=(aHours[n]||0)+elapsedHours(o.createdAt);
+    aCounts[n]=(aCounts[n]||0)+1;
+  });
+  const aNames=Object.keys(aHours);
+  const aAvg=aNames.map(n=>Math.round(aHours[n]/aCounts[n]*10)/10);
+  const sorted=aNames.map((n,i)=>({n,v:aAvg[i]})).sort((a,b)=>b.v-a.v);
+
+  if(CH2){CH2.destroy();CH2=null;}
+  CH2=new Chart(document.getElementById('ch-asesores'),{
+    type:'bar',
+    data:{labels:sorted.map(x=>x.n),datasets:[{
+      data:sorted.map(x=>x.v),
+      backgroundColor:sorted.map((_,i)=>['#1A56DB','#059669','#D97706','#7C3AED','#DC2626','#0EA5E9'][i%6]),
+      borderRadius:4,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}h promedio`}}},
+      scales:{x:{ticks:{color:TC,font:{size:10}},grid:{display:false}},y:{ticks:{color:TC,font:{size:10},callback:v=>v+'h'},grid:{color:GC}}}}
+  });
+}
+
+// MODAL
+function openModal(id){
+  const o=ALL_OPPS.find(x=>x.id===id);
+  if(!o) return;
+  const stage=STAGES[o.pipelineStageId]||{name:'—',color:'#F3F4F6',txt:'#6B7280'};
+  const h=elapsedHours(o.createdAt);
+  const tc=slaColor(h);
+  const tcCol=tc==='ok'?'var(--grn)':tc==='warn'?'var(--amb)':'var(--red)';
+
+  document.getElementById('m-name').textContent=o.name||'Sin nombre';
+  document.getElementById('m-stage-lbl').innerHTML=`<span style="background:${stage.color};color:${stage.txt};padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600">${stage.name}</span>`;
+
+  const rows=[
+    ['Modelo / Vehículo', getModelo(o)],
+    ['Placa', getPlaca(o)],
+    ['Valorización', `<span style="font-weight:700;color:var(--grn)">${getValorizacion(o)}</span>`],
+    ['Fuente', getFuente(o)],
+    ['Asesor asignado', USERS[o.assignedTo]||'—'],
+    ['Fecha creación', formatDate(o.createdAt)],
+    ['Última actualización', formatDate(o.updatedAt||o.createdAt)],
+    ['Tiempo en proceso', `<span style="font-weight:700;color:${tcCol}">${elapsed(o.createdAt)}</span>`],
+    ['SLA', slaBadge(h)],
+    ['Etapa actual', `<span style="background:${stage.color};color:${stage.txt};padding:2px 8px;border-radius:4px;font-size:11px">${stage.name}</span>`],
+  ];
+
+  // Add custom fields
+  if(o.customFields?.length){
+    o.customFields.forEach(f=>{
+      const val=f.fieldValueString||f.fieldValueNumber||'';
+      if(val) rows.push([`Campo (${f.id.substring(0,8)}...)`,val]);
+    });
+  }
+
+  document.getElementById('modal-body').innerHTML=rows.map(([k,v])=>
+    `<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`
+  ).join('');
+
+  document.getElementById('modal-bg').style.display='flex';
+}
+function closeModal(e){if(e.target===document.getElementById('modal-bg')) document.getElementById('modal-bg').style.display='none';}
+</script>
+</body>
+</html>
