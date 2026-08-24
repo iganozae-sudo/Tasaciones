@@ -781,6 +781,15 @@ function getFotos(opp){
 }
 
 // ── NOTAS (se cargan desde GHL al abrir el modal) ─────────────────────────
+function cleanNota(html){
+  // Convertir <br> y </p> en saltos de línea, quitar demás etiquetas HTML
+  let t = html.replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n').replace(/<[^>]+>/g,'');
+  // Decodificar entidades HTML comunes
+  const txt=document.createElement('textarea');
+  txt.innerHTML=t;
+  t=txt.value;
+  return t.trim().replace(/\n{3,}/g,'\n\n').replace(/</g,'&lt;');
+}
 async function loadNotas(contactId){
   const cont=document.getElementById('m-notas');
   if(!contactId){cont.innerHTML='<div style="font-size:12px;color:var(--mut2)">Sin contacto asociado.</div>';return;}
@@ -793,7 +802,7 @@ async function loadNotas(contactId){
       const fecha=n.dateAdded||n.createdAt;
       const autor=USERS[n.userId]||'';
       return `<div style="background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:.6rem .75rem;margin-bottom:.5rem">
-        <div style="font-size:12px;color:var(--txt);line-height:1.5;white-space:pre-wrap">${(n.body||'').replace(/</g,'&lt;')}</div>
+        <div style="font-size:12px;color:var(--txt);line-height:1.5;white-space:pre-wrap">${cleanNota(n.body||'')}</div>
         <div style="font-size:10px;color:var(--mut2);margin-top:.4rem">${autor?autor+' · ':''}${fecha?formatDate(fecha):''}</div>
       </div>`;
     }).join('');
