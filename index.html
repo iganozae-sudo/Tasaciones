@@ -767,6 +767,41 @@ function renderCharts(opps){
 }
 
 // MODAL
+// ── FOTOS DEL VEHÍCULO ────────────────────────────────────────────────────
+function getFotos(opp){
+  const fotos=[];
+  (opp.customFields||[]).forEach(f=>{
+    if(Array.isArray(f.fieldValueFiles)){
+      f.fieldValueFiles.forEach(file=>{
+        if(!file.deleted && file.url) fotos.push({url:file.url,name:file.meta?.name||'foto'});
+      });
+    }
+  });
+  return fotos;
+}
+
+// ── NOTAS (se cargan desde GHL al abrir el modal) ─────────────────────────
+async function loadNotas(contactId){
+  const cont=document.getElementById('m-notas');
+  if(!contactId){cont.innerHTML='<div style="font-size:12px;color:var(--mut2)">Sin contacto asociado.</div>';return;}
+  cont.innerHTML='<div style="font-size:12px;color:var(--mut2)">Cargando notas...</div>';
+  try{
+    const d=await api(`/contacts/${contactId}/notes`);
+    const notas=(d.notes||[]).sort((a,b)=>new Date(b.dateAdded||b.createdAt)-new Date(a.dateAdded||a.createdAt));
+    if(!notas.length){cont.innerHTML='<div style="font-size:12px;color:var(--mut2)">No hay notas registradas.</div>';return;}
+    cont.innerHTML=notas.map(n=>{
+      const fecha=n.dateAdded||n.createdAt;
+      const autor=USERS[n.userId]||'';
+      return `<div style="background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:.6rem .75rem;margin-bottom:.5rem">
+        <div style="font-size:12px;color:var(--txt);line-height:1.5;white-space:pre-wrap">${(n.body||'').replace(/</g,'&lt;')}</div>
+        <div style="font-size:10px;color:var(--mut2);margin-top:.4rem">${autor?autor+' · ':''}${fecha?formatDate(fecha):''}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    cont.innerHTML='<div style="font-size:12px;color:var(--amb)">No se pudieron cargar las notas (permisos de API).</div>';
+  }
+}
+
 function openModal(id){
   const o=ALL_OPPS.find(x=>x.id===id);
   if(!o) return;
@@ -795,11 +830,27 @@ function openModal(id){
     ['Etapa actual', `<span style="background:${stage.color};color:${stage.txt};padding:2px 8px;border-radius:4px;font-size:11px">${stage.name}</span>`],
   ];
 
-  document.getElementById('modal-body').innerHTML=rows.map(([k,v])=>
-    `<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`
-  ).join('');
+  const fotos=getFotos(o);
+  const fotosHtml = fotos.length ? `
+    <div style="margin-top:1rem">
+      <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem">Fotos del vehículo (${fotos.length})</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        ${fotos.map(f=>`<a href="${f.url}" target="_blank" title="${f.name}"><img src="${f.url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--bor);cursor:pointer" loading="lazy"></a>`).join('')}
+      </div>
+    </div>` : '';
+
+  document.getElementById('modal-body').innerHTML=
+    rows.map(([k,v])=>`<div class="modal-row"><span class="modal-key">${k}</span><span class="modal-val">${v}</span></div>`).join('')
+    + fotosHtml
+    + `<div style="margin-top:1rem">
+        <div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem">Notas</div>
+        <div id="m-notas"></div>
+      </div>`;
 
   document.getElementById('modal-bg').style.display='flex';
+
+  // Cargar notas del contacto de forma asíncrona
+  loadNotas(o.contactId);
 }
 function closeModal(e){if(e.target===document.getElementById('modal-bg')) document.getElementById('modal-bg').style.display='none';}
 </script>
