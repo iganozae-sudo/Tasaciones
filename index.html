@@ -790,6 +790,17 @@ function cleanNota(html){
   t=txt.value;
   return t.trim().replace(/\n{3,}/g,'\n\n').replace(/</g,'&lt;');
 }
+async function resolveUser(userId){
+  if(!userId) return '';
+  if(USERS[userId]) return USERS[userId];
+  try{
+    const u=await api(`/users/${userId}`);
+    const nombre=(u.name||((u.firstName||'')+' '+(u.lastName||''))).trim();
+    if(nombre){USERS[userId]=nombre;return nombre;}
+  }catch(e){}
+  return '';
+}
+
 async function loadNotas(contactId){
   const cont=document.getElementById('m-notas');
   if(!contactId){cont.innerHTML='<div style="font-size:12px;color:var(--mut2)">Sin contacto asociado.</div>';return;}
@@ -798,16 +809,18 @@ async function loadNotas(contactId){
     const d=await api(`/contacts/${contactId}/notes`);
     const notas=(d.notes||[]).sort((a,b)=>new Date(b.dateAdded||b.createdAt)-new Date(a.dateAdded||a.createdAt));
     if(!notas.length){cont.innerHTML='<div style="font-size:12px;color:var(--mut2)">No hay notas registradas.</div>';return;}
+    await Promise.all([...new Set(notas.map(n=>n.userId).filter(Boolean))].map(resolveUser));
     cont.innerHTML=notas.map(n=>{
       const fecha=n.dateAdded||n.createdAt;
-      const autor=USERS[n.userId]||'';
+      const autor=USERS[n.userId]||'Usuario';
+      const texto=(n.bodyText&&n.bodyText.trim())?n.bodyText.trim():cleanNota(n.body||'');
       return `<div style="background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:.6rem .75rem;margin-bottom:.5rem">
-        <div style="font-size:12px;color:var(--txt);line-height:1.5;white-space:pre-wrap">${cleanNota(n.body||'')}</div>
-        <div style="font-size:10px;color:var(--mut2);margin-top:.4rem">${autor?autor+' · ':''}${fecha?formatDate(fecha):''}</div>
+        <div style="font-size:12px;color:var(--txt);line-height:1.5;white-space:pre-wrap">${texto.replace(/</g,'&lt;')}</div>
+        <div style="font-size:10px;color:var(--mut2);margin-top:.4rem"><span style="font-weight:600;color:var(--acc)">${autor}</span> · ${fecha?formatDate(fecha):''}</div>
       </div>`;
     }).join('');
   }catch(e){
-    cont.innerHTML='<div style="font-size:12px;color:var(--amb)">No se pudieron cargar las notas (permisos de API).</div>';
+    cont.innerHTML='<div style="font-size:12px;color:var(--mut2)">No se pudieron cargar las notas (permisos de API).</div>';
   }
 }
 
