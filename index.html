@@ -280,7 +280,7 @@ body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;font-s
           <div style="position:relative;height:200px"><canvas id="ch-etapas"></canvas></div>
         </div>
         <div style="background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:1.1rem;box-shadow:var(--shadow)">
-          <div style="font-size:12px;font-weight:700;margin-bottom:.75rem;color:var(--txt)">Tiempo promedio por asesor (horas)</div>
+          <div style="font-size:12px;font-weight:700;margin-bottom:.75rem;color:var(--txt)">Tasaciones por asesor comercial</div>
           <div style="position:relative;height:200px"><canvas id="ch-asesores"></canvas></div>
         </div>
       </div>
@@ -532,7 +532,9 @@ const ASESOR_FIELD_ID = 'Tq2ultVzE0t4JI93KWP8';
 
 function getAsesorComercial(opp){
   const val = getField(opp, ASESOR_FIELD_ID);
-  return (val && val.trim()) ? val.trim() : 'Sin asignar';
+  if(!val || !val.trim()) return 'Sin asignar';
+  // Normalizar a "Primera Letra Mayúscula" para unificar ALEJANDRA / Alejandra / alejandra
+  return val.trim().toLowerCase().replace(/\s+/g,' ').replace(/\b\w/g, ch=>ch.toUpperCase());
 }
 
 // ── TIME HELPERS ──────────────────────────────────────────────────────────
@@ -747,16 +749,16 @@ function renderCharts(opps){
       scales:{x:{ticks:{color:TC,font:{size:10},callback:v=>v+'h'},grid:{color:GC}},y:{ticks:{color:TC,font:{size:10}},grid:{display:false}}}}
   });
 
-  // Chart 2: avg time per asesor
-  const aHours={};const aCounts={};
-  activas.forEach(o=>{
-    const n=getAsesorComercial(o).split(' ')[0];
-    aHours[n]=(aHours[n]||0)+elapsedHours(o.createdAt);
-    aCounts[n]=(aCounts[n]||0)+1;
+  // Chart 2: total tasaciones por asesor comercial (nombres ya unificados en getAsesorComercial)
+  const aCount={};
+  opps.forEach(o=>{
+    const n=getAsesorComercial(o);
+    if(!n||n==='Sin asignar') return;
+    aCount[n]=(aCount[n]||0)+1;
   });
-  const aNames=Object.keys(aHours);
-  const aAvg=aNames.map(n=>Math.round(aHours[n]/aCounts[n]*10)/10);
-  const sorted=aNames.map((n,i)=>({n,v:aAvg[i]})).sort((a,b)=>b.v-a.v);
+  const sorted=Object.keys(aCount)
+    .map(n=>({n,v:aCount[n]}))
+    .sort((a,b)=>b.v-a.v);
 
   if(CH2){CH2.destroy();CH2=null;}
   CH2=new Chart(document.getElementById('ch-asesores'),{
@@ -766,8 +768,8 @@ function renderCharts(opps){
       backgroundColor:sorted.map((_,i)=>['#911D98','#FC840C','#059669','#7C3AED','#DC2626','#B45309'][i%6]),
       borderRadius:4,
     }]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}h promedio`}}},
-      scales:{x:{ticks:{color:TC,font:{size:10}},grid:{display:false}},y:{ticks:{color:TC,font:{size:10},callback:v=>v+'h'},grid:{color:GC}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} tasacion${ctx.raw==1?'':'es'}`}}},
+      scales:{x:{ticks:{color:TC,font:{size:10}},grid:{display:false}},y:{ticks:{color:TC,font:{size:10},precision:0,stepSize:1},grid:{color:GC},beginAtZero:true}}}
   });
 }
 
